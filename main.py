@@ -1,6 +1,6 @@
 import pygame
 
-from utils import Board
+from utils.board import Board
 
 
 class Game:

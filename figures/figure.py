@@ -5,5 +5,6 @@ class Figure:
         self.color = color
         self.rank = rank
         self.image = None
+
     def get_possible_moves(self, board):
         return []

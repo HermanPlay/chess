@@ -11,4 +11,6 @@ class Rook(Figure):
         self.image = pygame.image.load(
             os.path.join("assets", "figures", f"{color}_rook.png")
         )
-        self.image = pygame.transform.scale(self.image, (Config.SQUARE_SIZE, Config.SQUARE_SIZE))
+        self.image = pygame.transform.scale(
+            self.image, (Config.SQUARE_SIZE, Config.SQUARE_SIZE)
+        )

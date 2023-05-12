@@ -2,7 +2,6 @@ import pygame
 
 from utils.square import Square
 from figures import Pawn, Rook, Queen, King, Knight, Bishop
-from figures.figure import Figure
 
 
 class Board:
@@ -29,10 +28,18 @@ class Board:
 
     def draw_moves(self, display: pygame.Surface):
         if self.chosen:
-            pygame.draw.rect(display, (255, 0, 0), self.chosen.rect, 5)
-            possible_moves = self.chosen.figure.get_possible_moves(self)
+            pygame.draw.rect(display, (0, 0, 255), self.chosen.rect, 5)
+            possible_moves, attacking_moves = self.chosen.figure.get_possible_moves(
+                self
+            )
+            if self.chosen.figure.rank == 100:
+                castling_moves = self.chosen.figure.get_castling(self)
+                for move in castling_moves:
+                    pygame.draw.rect(display, (255, 255, 0), move.rect, 5)
             for move in possible_moves:
                 pygame.draw.rect(display, (0, 255, 0), move.rect, 5)
+            for move in attacking_moves:
+                pygame.draw.rect(display, (255, 0, 0), move.rect, 5)
 
     def load_position_from_fen(self):
         fen = self.STARTING_FEN.split(" ")[0]
@@ -74,20 +81,30 @@ class Board:
 
     def click(self, pos: tuple[int, int]):
         if self.chosen:
-            possible_moves = self.chosen.figure.get_possible_moves(self)
-            if not possible_moves:
+            possible_moves, attacking_moves = self.chosen.figure.get_possible_moves(
+                self
+            )
+            castling_moves = []
+            if self.chosen.figure.rank == 100:
+                castling_moves = self.chosen.figure.get_castling(self)
+            if not possible_moves + attacking_moves + castling_moves:
                 self.chosen = None
                 return
-            for move in possible_moves:
+            for move in possible_moves + attacking_moves:
                 if move.rect.collidepoint(pos):
                     self.make_move(move)
+                    break
+            for move in castling_moves:
+                if move.rect.collidepoint(pos):
+                    self.chosen.figure.castle(move, self)
+                    self.chosen = None
                     break
             else:
                 self.chosen = None
         else:
-            print("else")
             for square in self.squares:
                 if square.rect.collidepoint(pos):
+                    print(square.figure)
                     if square.figure:
                         self.chosen = square
                     else:
@@ -99,7 +116,6 @@ class Board:
         self.chosen.figure.pos_y = move.rank
         if self.chosen.figure.rank == 1:
             if self.chosen.figure.pos_y == 7 or self.chosen.figure.pos_y == 0:
-                print("upgrade")
                 new_queen = Queen(
                     self.chosen.figure.pos_x,
                     self.chosen.figure.pos_y,
@@ -109,6 +125,8 @@ class Board:
                 self.squares[
                     self.chosen.figure.pos_x + self.chosen.figure.pos_y * 8
                 ].figure = new_queen
+            self.chosen.figure.first_move = False
+        if self.chosen.figure.rank == 5:
             self.chosen.figure.first_move = False
         self.chosen.figure = None
         self.chosen = None

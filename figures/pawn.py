@@ -18,6 +18,8 @@ class Pawn(Figure):
 
     def get_possible_moves(self, board):
         possible_moves = []
+        attacking_moves = []
+
         moves = [1]
         kill_moves = [-1, 1]
         if self.first_move:
@@ -35,7 +37,7 @@ class Pawn(Figure):
                     continue
                 if board.squares[possible_move].figure:
                     if board.squares[possible_move].figure.color != self.color:
-                        possible_moves.append(board.squares[possible_move])
+                        attacking_moves.append(board.squares[possible_move])
         else:
             for move in moves:
                 possible_move = self.pos_x + (self.pos_y + move) * 8
@@ -49,5 +51,5 @@ class Pawn(Figure):
                     continue
                 if board.squares[possible_move].figure:
                     if board.squares[possible_move].figure.color != self.color:
-                        possible_moves.append(board.squares[possible_move])
-        return possible_moves
+                        attacking_moves.append(board.squares[possible_move])
+        return (possible_moves, attacking_moves)

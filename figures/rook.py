@@ -14,3 +14,51 @@ class Rook(Figure):
         self.image = pygame.transform.scale(
             self.image, (Config.SQUARE_SIZE, Config.SQUARE_SIZE)
         )
+        self.first_move = True
+
+    def get_possible_moves(self, board):
+        possible_moves = []
+        attacking_moves = []
+
+        for y in range(self.pos_y + 1, 8):
+            if y == 8:
+                break
+            possible_move = self.pos_x + y * 8
+            if board.squares[possible_move].figure is None:
+                possible_moves.append(board.squares[possible_move])
+            elif board.squares[possible_move].figure.color != self.color:
+                attacking_moves.append(board.squares[possible_move])
+                break
+            else:
+                break
+        for y in range(self.pos_y - 1, -1, -1):
+            possible_move = self.pos_x + y * 8
+            if board.squares[possible_move].figure is None:
+                possible_moves.append(board.squares[possible_move])
+            elif board.squares[possible_move].figure.color != self.color:
+                attacking_moves.append(board.squares[possible_move])
+                break
+            else:
+                break
+        for x in range(self.pos_x + 1, 8):
+            if x == 8:
+                break
+            possible_move = x + self.pos_y * 8
+            if board.squares[possible_move].figure is None:
+                possible_moves.append(board.squares[possible_move])
+            elif board.squares[possible_move].figure.color != self.color:
+                attacking_moves.append(board.squares[possible_move])
+                break
+            else:
+                break
+        for x in range(self.pos_x - 1, -1, -1):
+            possible_move = x + self.pos_y * 8
+            if board.squares[possible_move].figure is None:
+                possible_moves.append(board.squares[possible_move])
+            elif board.squares[possible_move].figure.color != self.color:
+                attacking_moves.append(board.squares[possible_move])
+                break
+            else:
+                break
+
+        return (possible_moves, attacking_moves)

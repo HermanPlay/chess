@@ -14,3 +14,22 @@ class Knight(Figure):
         self.image = pygame.transform.scale(
             self.image, (Config.SQUARE_SIZE, Config.SQUARE_SIZE)
         )
+
+    def get_possible_moves(self, board):
+        possible_moves = []
+        attacking_moves = []
+
+        moves = ((-1, -2), (1, -2), (-2, -1), (2, -1), (-2, 1), (2, 1), (-1, 2), (1, 2))
+
+        for move in moves:
+            new_x = self.pos_x + move[0]
+            new_y = self.pos_y + move[1]
+            possible_move = new_x + new_y * 8
+            if new_x < 0 or new_x > 7 or new_y < 0 or new_y > 7:
+                continue
+            if board.squares[possible_move].figure is None:
+                possible_moves.append(board.squares[possible_move])
+            elif board.squares[possible_move].figure.color != self.color:
+                attacking_moves.append(board.squares[possible_move])
+
+        return (possible_moves, attacking_moves)

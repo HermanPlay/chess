@@ -1,4 +1,5 @@
-import pygame
+import pygame   
+import copy
 
 from utils.square import Square
 from figures import Pawn, Rook, Queen, King, Knight, Bishop
@@ -6,10 +7,10 @@ from figures import Pawn, Rook, Queen, King, Knight, Bishop
 
 class Board:
     def __init__(self):
-
         self.STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
         self.squares = []
         self.chosen: Square = None
+        self.white_to_move = True
 
         #  Create a 8x8 board
         index = 0
@@ -52,29 +53,29 @@ class Board:
                 file = 0
                 continue
             if symbol == "p":
-                self.squares[file + rank * 8].figure = Pawn(file, rank, "black", 1)
+                self.squares[file + rank * 8].figure = Pawn(file, rank, False, 1)
             elif symbol == "P":
-                self.squares[file + rank * 8].figure = Pawn(file, rank, "white", 1)
+                self.squares[file + rank * 8].figure = Pawn(file, rank, True, 1)
             elif symbol == "r":
-                self.squares[file + rank * 8].figure = Rook(file, rank, "black", 5)
+                self.squares[file + rank * 8].figure = Rook(file, rank, False, 5)
             elif symbol == "R":
-                self.squares[file + rank * 8].figure = Rook(file, rank, "white", 5)
+                self.squares[file + rank * 8].figure = Rook(file, rank, True, 5)
             elif symbol == "n":
-                self.squares[file + rank * 8].figure = Knight(file, rank, "black", 3)
+                self.squares[file + rank * 8].figure = Knight(file, rank, False, 3)
             elif symbol == "N":
-                self.squares[file + rank * 8].figure = Knight(file, rank, "white", 3)
+                self.squares[file + rank * 8].figure = Knight(file, rank, True, 3)
             elif symbol == "b":
-                self.squares[file + rank * 8].figure = Bishop(file, rank, "black", 3)
+                self.squares[file + rank * 8].figure = Bishop(file, rank, False, 3)
             elif symbol == "B":
-                self.squares[file + rank * 8].figure = Bishop(file, rank, "white", 3)
+                self.squares[file + rank * 8].figure = Bishop(file, rank, True, 3)
             elif symbol == "q":
-                self.squares[file + rank * 8].figure = Queen(file, rank, "black", 9)
+                self.squares[file + rank * 8].figure = Queen(file, rank, False, 9)
             elif symbol == "Q":
-                self.squares[file + rank * 8].figure = Queen(file, rank, "white", 9)
+                self.squares[file + rank * 8].figure = Queen(file, rank, True, 9)
             elif symbol == "k":
-                self.squares[file + rank * 8].figure = King(file, rank, "black", 100)
+                self.squares[file + rank * 8].figure = King(file, rank, False, 100)
             elif symbol == "K":
-                self.squares[file + rank * 8].figure = King(file, rank, "white", 100)
+                self.squares[file + rank * 8].figure = King(file, rank, True, 100)
             print(file, rank, symbol)
 
             file += 1
@@ -92,7 +93,12 @@ class Board:
                 return
             for move in possible_moves + attacking_moves:
                 if move.rect.collidepoint(pos):
+                    board_copy = self.squares.copy()
                     self.make_move(move)
+                    if self.is_check(self.white_to_move, self.squares):
+                        print("Check")
+                        self.squares = board_copy.copy()
+                        break
                     break
             for move in castling_moves:
                 if move.rect.collidepoint(pos):
@@ -106,11 +112,17 @@ class Board:
                 if square.rect.collidepoint(pos):
                     print(square.figure)
                     if square.figure:
-                        self.chosen = square
+                        if self.white_to_move and square.figure.color:
+                            self.chosen = square
+                            break
+                        elif not self.white_to_move and not square.figure.color:
+                            self.chosen = square
+                            break
                     else:
                         self.chosen = None
 
     def make_move(self, move: Square):
+        self.white_to_move = not self.white_to_move
         move.figure = self.chosen.figure
         self.chosen.figure.pos_x = move.file
         self.chosen.figure.pos_y = move.rank
@@ -130,3 +142,24 @@ class Board:
             self.chosen.figure.first_move = False
         self.chosen.figure = None
         self.chosen = None
+
+    def is_check(self, color: bool) -> bool:
+        """
+        Checks if the king of the given color is in check.
+
+        :param color: True if for white, False if for black
+        :return: True if the king is in check, False otherwise
+        """
+        attacking_moves = []
+        for square in self.squares:
+            if square.figure:
+                if square.figure.color == color and square.figure.rank == 100:
+                    king = square
+                elif square.figure.color != color:
+                    possible_moves, attacking = square.figure.get_possible_moves(
+                        self
+                    )
+                    attacking_moves += attacking
+        if king in attacking_moves:
+            return True
+        return False

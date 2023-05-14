@@ -8,8 +8,9 @@ from figures.figure import Figure
 class Knight(Figure):
     def __init__(self, pos_x, pos_y, color, rank):
         super().__init__(pos_x, pos_y, color, rank)
+        asset_color = "white" if color else "black"
         self.image = pygame.image.load(
-            os.path.join("assets", "figures", f"{color}_knight.png")
+            os.path.join("assets", "figures", f"{asset_color}_knight.png")
         )
         self.image = pygame.transform.scale(
             self.image, (Config.SQUARE_SIZE, Config.SQUARE_SIZE)

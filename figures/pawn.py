@@ -8,8 +8,9 @@ from figures.figure import Figure
 class Pawn(Figure):
     def __init__(self, pos_x, pos_y, color, rank):
         super().__init__(pos_x, pos_y, color, rank)
+        asset_color = "white" if color else "black"
         self.image = pygame.image.load(
-            os.path.join("assets", "figures", f"{color}_pawn.png")
+            os.path.join("assets", "figures", f"{asset_color}_pawn.png")
         )
         self.image = pygame.transform.scale(
             self.image, (Config.SQUARE_SIZE, Config.SQUARE_SIZE)
@@ -24,7 +25,7 @@ class Pawn(Figure):
         kill_moves = [-1, 1]
         if self.first_move:
             moves.append(2)
-        if self.color == "white":
+        if self.color:
             for move in moves:
                 possible_move = self.pos_x + (self.pos_y - move) * 8
                 if possible_move < 0 or possible_move > 63:
